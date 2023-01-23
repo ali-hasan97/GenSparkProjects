@@ -1,10 +1,12 @@
 import java.util.*;
-public class Main {
+public class Hangman {
     // generate word. Take input for guess. Check if guess correct or not. Handle correct. Handle incorrect. Print hangman. Print letters and missed letters.
 
     public static String generateWord() {
-        // TODO: NEED TO UPDATE!
-        return "catinthehat";
+        String[] words = new String[] {"catinthehat", "bullseye", "daredevil", "arsenal", "barcelona", "mustang", "stingray", "koala", "sloth"};
+        Random random = new Random();
+        int rand = random.nextInt(words.length);
+        return words[rand];
     }
 
     public static String updateCurrWord(String currWord, int idx, String guess) {
@@ -43,7 +45,8 @@ public class Main {
         // if currWord is different from prevWord, it means the guess was correct, so return here
         if (!currWord.equals(prevWord)) {
             printMan(head, arms, body, leg1, leg2, missed);
-            return new String[] {currWord, missed, String.valueOf(wrongCount), head, arms, body, leg1, leg2};
+            String[] strArray = new String[] {currWord, missed, String.valueOf(wrongCount), head, arms, body, leg1, leg2};
+            return strArray;
         }
 
         // if guess is not update wrongCount, missed, and the man's limbs
@@ -117,6 +120,6 @@ public class Main {
 
         // win/lose statement
         if (currWord.equals(correctWord)) System.out.println("Nice work! You guessed correctly so no one was hanged!");
-        else System.out.println("You've just let a man die by guessing incorrectly too many times. Shame on you.");
+        else System.out.println("You've just let a man die by guessing incorrectly too many times. Shame on you.\nThe correct word was " + correctWord + ".");
     }
 }
