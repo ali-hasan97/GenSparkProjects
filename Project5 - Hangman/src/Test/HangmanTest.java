@@ -2,11 +2,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 class HangmanTest {
 
-    Hangman.Hangman hangman;
+    Hangman hangman;
 
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
-        hangman = new Hangman.Hangman();
+        hangman = new Hangman();
     }
 
     @org.junit.jupiter.api.AfterEach
