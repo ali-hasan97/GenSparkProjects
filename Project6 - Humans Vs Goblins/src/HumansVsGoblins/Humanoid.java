@@ -1,46 +1,55 @@
-import java.util.Arrays;
+import java.util.*;
 
 public class Humanoid {
     private int health;
-    private int[] position = new int[2];
+    private int armor; // attack magnitudes are divided by this number
+    private ArrayList<Integer> position = new ArrayList<>();
 
     public int getHealth() {
-        System.out.println(health);
+        // System.out.println(this.getClass().toString() + "health" + health);
         return health;
     }
 
-    public int[] getPosition() {
-        System.out.print(Arrays.toString(position));
+    public int getArmor() {
+        return armor;
+    }
+
+    public ArrayList<Integer> getPosition() {
         return position;
     }
 
     public void setHealth(int newHealth) {
         this.health = newHealth;
-        System.out.println("Health set to " + this.health);
+        // System.out.println("Health set to " + this.health);
+    }
+
+    public void setArmor(int newArmor) {
+        this.armor = newArmor;
     }
 
     public void setPosition(String key) {
         this.position = move(key);
-        System.out.println("Position set to " + Arrays.toString(this.position));
     }
 
-    public int[] move(String key) {
+    public void setPosition(int a, int b) {
+        this.position.clear();
+        this.position.add(a);
+        this.position.add(b);
+    }
+
+    public ArrayList<Integer> move(String key) {
         switch(key) {
             case("n") :
-                System.out.println("n");
-                position[0] -= 1;
+                position.set(0, position.get(0) - 1);
                 return position;
             case("s") :
-                System.out.println("s");
-                position[0] += 1;
+                position.set(0, position.get(0) + 1);
                 return position;
             case("e") :
-                System.out.println("e");
-                position[1] += 1;
+                position.set(1, position.get(1) + 1);
                 return position;
             case("w") :
-                System.out.println("w");
-                position[1] -= 1;
+                position.set(1, position.get(1) - 1);
                 return position;
             default :
                 return position;
@@ -50,6 +59,6 @@ public class Humanoid {
     public String toString() {
         return this.getClass().toString() +
                 "\nhealth " + health +
-                "\nposition " + Arrays.toString(position);
+                "\nposition " + position.toString();
     }
 }
