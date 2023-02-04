@@ -5,10 +5,7 @@ public class Humanoid {
     private int armor; // attack magnitudes are divided by this number
     private ArrayList<Integer> position = new ArrayList<>();
 
-    public int getHealth() {
-        // System.out.println(this.getClass().toString() + "health" + health);
-        return health;
-    }
+    public int getHealth() { return health; }
 
     public int getArmor() {
         return armor;
@@ -18,10 +15,7 @@ public class Humanoid {
         return position;
     }
 
-    public void setHealth(int newHealth) {
-        this.health = newHealth;
-        // System.out.println("Health set to " + this.health);
-    }
+    public void setHealth(int newHealth) { this.health = newHealth; }
 
     public void setArmor(int newArmor) {
         this.armor = newArmor;
@@ -57,8 +51,10 @@ public class Humanoid {
     }
 
     public String toString() {
-        return this.getClass().toString() +
+        return "\n" +
+                this.getClass().toString() +
                 "\nhealth " + health +
+                "\narmor " + armor +
                 "\nposition " + position.toString();
     }
 }

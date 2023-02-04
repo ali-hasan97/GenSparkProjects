@@ -26,10 +26,12 @@ public class Grid {
         ArrayList<Integer> humanPos = human.getPosition();
         labelGrid[humanPos.get(0)][humanPos.get(1)].setText("H");
 
-        for (int i = 0; i < goblins.length; i++) {
-            ArrayList<Integer> goblinPos = goblins[i].getPosition();
+        for (Goblin goblin : goblins) {
+            ArrayList<Integer> goblinPos = goblin.getPosition();
             labelGrid[goblinPos.get(0)][goblinPos.get(1)].setText("G");
         }
+
+        JOptionPane.showMessageDialog(null, "Welcome to Humans vs Goblins! Kill all the goblins to win. Move your player by pressing the 'n, s, e, w' keys or by clicking them below. Good luck!");
     }
 
     private JLabel[][] createLabelGrid(int rows, int cols) {
@@ -58,57 +60,20 @@ public class Grid {
         int rows = 1;
         int cols = 4;
         String[] direction = {"n", "s", "e", "w"};
-        JButton[] buttons = new JButton[cols];
         JPanel panel = new JPanel(new GridLayout(rows, cols));
         final int[] gobCount = {0}; // determines which goblin you are fighting
         for (int j = 0; j < cols; j++) {
             JButton button = new JButton(direction[j]);
-            buttons[j] = button;
-            final String jStr = direction[j];
-            final int jTemp = j;
-            final int iTemp = 0;
+            String dir = direction[j];
 
             button.addKeyListener(new KeyListener() {
                 @Override
                 public void keyTyped(KeyEvent e) {
-                    ArrayList<Integer> prevPos = new ArrayList<>();
-                    prevPos.add(human.getPosition().get(0));
-                    prevPos.add(human.getPosition().get(1));
                     String key = Character.toString(e.getKeyChar());
-                    labels[prevPos.get(0)][prevPos.get(1)].setText(" ");
-                    human.setPosition(key);
+                    JLabel label = handleMove(human, key, labels);
 
-                    ArrayList<Integer> pos = new ArrayList<>();
-                    pos.add(human.getPosition().get(0));
-                    pos.add(human.getPosition().get(1));
-                    JLabel label;
-
-                    // protection from going out of bounds
-                    try {
-                        label = labels[pos.get(0)][pos.get(1)];
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, "You are attempting to go out of bounds. Please pick a different direction");
-                        label = labels[prevPos.get(0)][prevPos.get(1)];
-                        human.setPosition(prevPos.get(0), prevPos.get(1));
-                    }
-
-                    // combat
                     if (label.getText().equals("G")) {
-                        JOptionPane.showMessageDialog(null, "You have entered combat!");
-                        while(human.getHealth() != 0 && goblins[gobCount[0]].getHealth() != 0) {
-                            JOptionPane.showMessageDialog(null, "You attacked goblin for " + human.attack(goblins[gobCount[0]]) + ". Remaining goblin health: " + goblins[gobCount[0]].getHealth());
-                            JOptionPane.showMessageDialog(null, "Goblin attacked you for " + goblins[gobCount[0]].attack(human) + " Your remaining health: " + human.getHealth());
-                        }
-                        if (human.getHealth() == 0) {
-                            label.setText("G");
-                            JOptionPane.showMessageDialog(null, "The goblin has killed you. Game over!");
-                        } else {
-                            label.setText("H");
-                            if (gobCount[0] == goblins.length - 1) {
-                                JOptionPane.showMessageDialog(null, "You're a hero! You killed all the goblins. You've won the game!");
-                            }
-                        }
-                        gobCount[0]++;
+                        combat(human, goblins, gobCount, label);
                     } else label.setText("H");
                 }
 
@@ -125,47 +90,56 @@ public class Grid {
 
             button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    ArrayList<Integer> prevPos = new ArrayList<>();
-                    prevPos.add(human.getPosition().get(0));
-                    prevPos.add(human.getPosition().get(1));
-                    labels[prevPos.get(0)][prevPos.get(1)].setText(" ");
-                    human.setPosition(jStr);
-
-                    ArrayList<Integer> pos = new ArrayList<>();
-                    pos.add(human.getPosition().get(0));
-                    pos.add(human.getPosition().get(1));
-                    JLabel label;
-
-                    // protection from going out of bounds
-                    try {
-                        label = labels[pos.get(0)][pos.get(1)];
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, "You are attempting to go out of bounds. Please pick a different direction");
-                        label = labels[prevPos.get(0)][prevPos.get(1)];
-                        human.setPosition(prevPos.get(0), prevPos.get(1));
-                    }
+                    JLabel label = handleMove(human, dir, labels);
 
                     if (label.getText().equals("G")) {
-                        JOptionPane.showMessageDialog(null, "You have entered combat!");
-                        while(human.getHealth() != 0 && goblins[gobCount[0]].getHealth() != 0) {
-                            JOptionPane.showMessageDialog(null, "You attacked goblin for " + human.attack(goblins[gobCount[0]]) + ". Remaining goblin health: " + goblins[gobCount[0]].getHealth());
-                            JOptionPane.showMessageDialog(null, "Goblin attacked you for " + goblins[gobCount[0]].attack(human) + " Your remaining health: " + human.getHealth());
-                        }
-                        if (human.getHealth() == 0) {
-                            label.setText("G");
-                            JOptionPane.showMessageDialog(null, "The goblin has killed you. Game over!");
-                        } else {
-                            label.setText("H");
-                            if (gobCount[0] == goblins.length - 1) {
-                                JOptionPane.showMessageDialog(null, "You're a hero! You killed all the goblins. You've won the game!");
-                            }
-                        }
-                        gobCount[0]++;
+                        combat(human, goblins, gobCount, label);
                     } else label.setText("H");
                 }
             });
             panel.add(button);
         }
         return panel;
+    }
+
+    private JLabel handleMove(Human human, String key, JLabel[][] labels) {
+        ArrayList<Integer> prevPos = new ArrayList<>();
+        prevPos.add(human.getPosition().get(0));
+        prevPos.add(human.getPosition().get(1));
+        labels[prevPos.get(0)][prevPos.get(1)].setText(" ");
+        human.setPosition(key);
+
+        ArrayList<Integer> pos = new ArrayList<>();
+        pos.add(human.getPosition().get(0));
+        pos.add(human.getPosition().get(1));
+        JLabel label;
+
+        // protection from going out of bounds
+        try {
+            label = labels[pos.get(0)][pos.get(1)];
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "You are attempting to go out of bounds. Please pick a different direction");
+            label = labels[prevPos.get(0)][prevPos.get(1)];
+            human.setPosition(prevPos.get(0), prevPos.get(1));
+        }
+        return label;
+    }
+
+    private void combat(Human human, Goblin[] goblins, int[] gobCount, JLabel label) {
+        JOptionPane.showMessageDialog(null, "You have entered combat!");
+        while(human.getHealth() != 0 && goblins[gobCount[0]].getHealth() != 0) {
+            JOptionPane.showMessageDialog(null, "You attacked goblin for " + human.attack(goblins[gobCount[0]]) + ". Remaining goblin health: " + goblins[gobCount[0]].getHealth());
+            JOptionPane.showMessageDialog(null, "Goblin attacked you for " + goblins[gobCount[0]].attack(human) + " Your remaining health: " + human.getHealth());
+        }
+        if (human.getHealth() == 0) {
+            label.setText("G");
+            JOptionPane.showMessageDialog(null, "The goblin has killed you. Game over!");
+        } else {
+            label.setText("H");
+            if (gobCount[0] == goblins.length - 1) {
+                JOptionPane.showMessageDialog(null, "You're a hero! You killed all the goblins. You've won the game!");
+            }
+        }
+        gobCount[0]++;
     }
 }
