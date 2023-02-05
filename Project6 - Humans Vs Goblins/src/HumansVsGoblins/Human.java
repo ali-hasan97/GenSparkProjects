@@ -3,6 +3,7 @@ public class Human extends Humanoid {
         int humanAttack = (int) ((Math.random() * 100)/goblin.getArmor());
         goblin.setHealth(goblin.getHealth() - humanAttack);
         if (goblin.getHealth() < 0) goblin.setHealth(0);
+        System.out.println(goblin);
         return humanAttack;
     }
 }

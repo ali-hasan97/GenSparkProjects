@@ -51,9 +51,10 @@ public class Humanoid {
     }
 
     public String toString() {
+        String name = (this.getClass().toString().equals("class Human")) ? "Human" : "Goblin";
         return "\n" +
-                this.getClass().toString() +
-                "\nhealth " + health +
+                name +
+                ":\nhealth " + health +
                 "\narmor " + armor +
                 "\nposition " + position.toString();
     }

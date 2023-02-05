@@ -1,5 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -13,11 +14,10 @@ public class Grid {
         JPanel labelPanel = createPanel(labelGrid);
         JPanel buttonPanel = createButtonPanel(labelGrid, goblins, human);
 
-        JFrame frame = new JFrame();
-        frame.setPreferredSize(new Dimension(1000, 1000));
-        frame.setLayout(new GridLayout(2, 1));
+        JFrame frame = new JFrame("Human Vs Goblins");
+        frame.setPreferredSize(new Dimension(900, 1000));
         frame.add(labelPanel);
-        frame.add(buttonPanel);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -36,9 +36,11 @@ public class Grid {
 
     private JLabel[][] createLabelGrid(int rows, int cols) {
         JLabel[][] labels = new JLabel[rows][cols];
+        Border blackLine = BorderFactory.createLineBorder(Color.black);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                labels[i][j] = new JLabel(" ");
+                labels[i][j] = new JLabel(" ", SwingConstants.CENTER);
+                labels[i][j].setBorder(blackLine);
             }
         }
         return labels;
@@ -47,6 +49,7 @@ public class Grid {
     private JPanel createPanel(JLabel[][] labels) {
         int rows = labels.length;
         int cols = labels[0].length;
+
         JPanel panel = new JPanel(new GridLayout(rows, cols));
         for (JLabel[] rowOfLabels: labels) {
             for (JLabel label : rowOfLabels) {
@@ -61,6 +64,7 @@ public class Grid {
         int cols = 4;
         String[] direction = {"n", "s", "e", "w"};
         JPanel panel = new JPanel(new GridLayout(rows, cols));
+        panel.setPreferredSize(new Dimension(900, 100));
         final int[] gobCount = {0}; // determines which goblin you are fighting
         for (int j = 0; j < cols; j++) {
             JButton button = new JButton(direction[j]);
@@ -129,11 +133,12 @@ public class Grid {
         JOptionPane.showMessageDialog(null, "You have entered combat!");
         while(human.getHealth() != 0 && goblins[gobCount[0]].getHealth() != 0) {
             JOptionPane.showMessageDialog(null, "You attacked goblin for " + human.attack(goblins[gobCount[0]]) + ". Remaining goblin health: " + goblins[gobCount[0]].getHealth());
-            JOptionPane.showMessageDialog(null, "Goblin attacked you for " + goblins[gobCount[0]].attack(human) + " Your remaining health: " + human.getHealth());
+            JOptionPane.showMessageDialog(null, "Goblin attacked you for " + goblins[gobCount[0]].attack(human) + ". Your remaining health: " + human.getHealth());
         }
         if (human.getHealth() == 0) {
             label.setText("G");
             JOptionPane.showMessageDialog(null, "The goblin has killed you. Game over!");
+            System.exit(0);
         } else {
             label.setText("H");
             if (gobCount[0] == goblins.length - 1) {
