@@ -19,9 +19,8 @@ public class Hangman {
         currWord = beg + guess + end;
         return currWord;
     }
-    public static void printMan(String head, String arms, String body, String leg1, String leg2, String missed, String currWord) {
-        System.out.println();
-        System.out.println(" +----+\n " + head + "    |\n" + arms + "   |\n " + body + "    |\n" + leg1 + " " + leg2 + "  ===");
+    public static void printMan(String missed, String currWord) {
+        System.out.println(HangmanArt.hangmanArt(missed.length()));
         System.out.println("Missed letters:" + missed);
         System.out.println(currWord);
     }
@@ -37,7 +36,7 @@ public class Hangman {
     }
 
     // check if guess correct or not and handle accordingly
-    public static String[] checkGuess(String guess, String correctWord, String currWord, String missed, int wrongCount, String head, String arms, String body, String leg1, String leg2, String remWord) {
+    public static String[] checkGuess(String guess, String correctWord, String currWord, String missed, int wrongCount, String remWord) {
         String prevWord = currWord;
 
         // check if guess is in correctWord, and update currWord if it is.
@@ -54,78 +53,72 @@ public class Hangman {
 
             // if there is a duplicate letter, don't print anything and just go back to the main loop
             if (remWord.contains(guess)) {
-                String[] strArray = new String[] {currWord, missed, String.valueOf(wrongCount), head, arms, body, leg1, leg2, remWord};
+                String[] strArray = new String[] {currWord, missed, String.valueOf(wrongCount), remWord};
                 return strArray;
             };
         }
 
         // if currWord is different from prevWord, it means the guess was correct, so return here
         if (!currWord.equals(prevWord)) {
-            printMan(head, arms, body, leg1, leg2, missed, currWord);
-            String[] strArray = new String[] {currWord, missed, String.valueOf(wrongCount), head, arms, body, leg1, leg2, remWord};
+            printMan(missed, currWord);
+            String[] strArray = new String[] {currWord, missed, String.valueOf(wrongCount), remWord};
             return strArray;
         }
 
-        // if guess is not update wrongCount, missed, and the man's limbs
+        // if guess is not update wrongCount and missed
         wrongCount++;
         missed += guess;
-
-        switch (wrongCount) {
-            case (1) :
-                head = "O";
-                break;
-            case (2) :
-                arms = "---";
-                break;
-            case (3) :
-                body = "|";
-                break;
-            case (4) :
-                leg1 = "/";
-                break;
-            case (5) :
-                leg2 = "\\";
-                break;
-        }
-        printMan(head, arms, body, leg1, leg2, missed, currWord);
-        return new String[] {currWord, missed, String.valueOf(wrongCount), head, arms, body, leg1, leg2, remWord};
+        printMan(missed, currWord);
+        return new String[] {currWord, missed, String.valueOf(wrongCount), remWord};
     }
+
+    public static void findHighScore() {
+        try {
+            List<String> scores = Files.readAllLines(Paths.get("./src/Hangman/Record.txt"), StandardCharsets.UTF_8);
+            ArrayList<Object> highestScore = new ArrayList<>();
+            String name = scores.get(scores.size() - 1).split(" - ")[0];
+            int score = Integer.parseInt(scores.get(scores.size() - 1).split(" - ")[1]);
+            highestScore.add(name);
+            highestScore.add(score);
+            scores.stream()
+                    .map(eachScore -> eachScore.split(" - "))
+                    .forEach(parts -> {
+                        if (((int) highestScore.get(1)) < Integer.parseInt(parts[1])) {
+                            highestScore.set(0, parts[0]);
+                            highestScore.set(1, Integer.parseInt(parts[1]));
+                        }
+                    });
+            if ((int) highestScore.get(1) == score) {
+                System.out.println("Congrats! You hold the highest score with " + score + " games won in a row! Well played.");
+            } else {
+                System.out.println("Unfortunately your score of " + score + " is not the highest score. The current highest score is held by " + highestScore.get(0) + " with " + highestScore.get(1) + " games won in a row!");
+            }
+        } catch (Exception e) {
+            System.out.println("Couldn't find high score");
+        }
+    }
+
     public static void main(String[] args) {
 
-        String head = " ";
-        String arms = "   ";
-        String body = " ";
-        String leg1 = " ";
-        String leg2 = " ";
         String guess = " ";
         String missed = "";
         String currWord = "";
-        String highScore = "";
+        int currScore = 0;
+        int highScore = 0;
         String numbers = "0123456789";
         int wrongCount = 0;
-
-        try {
-            FileWriter myWriter = new FileWriter("./src/Hangman/Record.txt", true);
-            BufferedWriter bw = new BufferedWriter(myWriter);
-            bw.newLine();
-            bw.write("testing");
-            bw.close();
-            List<String> scores = Files.readAllLines(Paths.get("./src/Hangman/Record.txt"), StandardCharsets.UTF_8);
-            System.out.println(scores);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        boolean rematch = true;
 
         System.out.println("H A N G M A N");
         System.out.println("You have 5 guesses before the man is hanged. Guess each letter of the word, one letter at a time.");
-        printMan(head, arms, body, leg1, leg2, missed, currWord);
+        printMan(missed, currWord);
         String correctWord = generateWord();
         String remWord = correctWord;
         currWord = correctWord.codePoints().mapToObj(c -> "_").collect(Collectors.joining());
         System.out.println(currWord);
 
         // main game loop
-        while (wrongCount < 5 && !currWord.equals(correctWord)) {
+        while (wrongCount < 5 && !currWord.equals(correctWord) && rematch) {
 
             // handle duplicate letters
             if (remWord.contains(guess)) {
@@ -142,11 +135,10 @@ public class Hangman {
                     continue;
                 } else {
                     guess = " ";
-                    printMan(head, arms, body, leg1, leg2, missed, currWord);
+                    printMan(missed, currWord);
                 }
             }
-
-            guess = takeGuess();
+            if (!currWord.equals(correctWord)) guess = takeGuess();
 
             // keep prompting for guesses if guess has been used before or is invalid
             if (guess.length() != 1 || (missed.indexOf(guess.charAt(0)) != -1 || numbers.contains(guess) || currWord.indexOf(guess.charAt(0)) != -1)) {
@@ -161,20 +153,57 @@ public class Hangman {
             }
 
             // Update variables in main
-            String[] outArray = checkGuess(guess, correctWord, currWord, missed, wrongCount, head, arms, body, leg1, leg2, remWord);
+            String[] outArray = checkGuess(guess, correctWord, currWord, missed, wrongCount, remWord);
             currWord = outArray[0];
             missed = outArray[1];
             wrongCount = Integer.parseInt(outArray[2]);
-            head = outArray[3];
-            arms = outArray[4];
-            body = outArray[5];
-            leg1 = outArray[6];
-            leg2 = outArray[7];
-            remWord = outArray[8];
-        }
+            remWord = outArray[3];
 
-        // win/lose statement
-        if (currWord.equals(correctWord)) System.out.println("Nice work! You guessed correctly so no one was hanged!");
-        else System.out.println("You've just let a man die by guessing incorrectly too many times. Shame on you.\nThe correct word was " + correctWord + ".");
+            // win/lose statement
+            if (currWord.equals(correctWord) || wrongCount >= 5) {
+                if (currWord.equals(correctWord)) {
+                    System.out.println("Nice work! You guessed correctly so no one was hanged!\nDo you want to keep playing? (y or n)");
+                    currScore += 1;
+                } else {
+                    System.out.println("You've just let a man die by guessing incorrectly too many times. Shame on you.\nThe correct word was " + correctWord + ".\nDo you want to play again? (y or n)");
+                    highScore = Math.max(highScore, currScore);
+                    currScore = 0;
+                }
+                try {
+                    Scanner sc = new Scanner(System.in);
+                    String rematchInput = sc.nextLine();
+                    if (rematchInput.equalsIgnoreCase("y")) {
+                        System.out.println("You have 5 guesses before the man is hanged. Guess each letter of the word, one letter at a time.");
+                        guess = " ";
+                        missed = "";
+                        wrongCount = 0;
+                        correctWord = generateWord();
+                        remWord = correctWord;
+                        currWord = correctWord.codePoints().mapToObj(c -> "_").collect(Collectors.joining());
+                        printMan(missed, currWord);
+                    } else if (rematchInput.equalsIgnoreCase("n")) {
+                        rematch = false;
+                        try {
+                            FileWriter myWriter = new FileWriter("./src/Hangman/Record.txt", true);
+                            BufferedWriter bw = new BufferedWriter(myWriter);
+                            System.out.println("Please enter your name so your high score can be recorded.");
+                            bw.write(sc.nextLine() + " - " + Math.max(highScore, currScore));
+                            bw.newLine();
+                            bw.close();
+                            sc.close();
+                            findHighScore();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println("Thanks for playing!");
+                    } else {
+                        rematch = false;
+                        System.out.println("Invalid input. Exiting game.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Invalid input. Exiting game.");
+                }
+            }
+        }
     }
 }
